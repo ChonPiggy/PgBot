@@ -6,6 +6,7 @@ import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.action.URIAction;
+import com.linecorp.bot.model.action.URIAction.AltUri;
 import com.linecorp.bot.model.action.MessageAction;
 import com.linecorp.bot.model.action.PostbackAction;
 import com.linecorp.bot.model.event.Event;
@@ -20,6 +21,8 @@ import com.linecorp.bot.model.message.LocationMessage;
 import com.linecorp.bot.model.message.template.ButtonsTemplate;
 import com.linecorp.bot.model.message.template.CarouselColumn;
 import com.linecorp.bot.model.message.template.CarouselTemplate;
+import com.linecorp.bot.model.message.template.ImageCarouselColumn;
+import com.linecorp.bot.model.message.template.ImageCarouselTemplate;
 //import com.linecorp.bot.model.message.template.ImageCarouselColumn;
 //import com.linecorp.bot.model.message.template.ImageCarouselTemplate;
 import com.linecorp.bot.model.profile.UserProfileResponse;
@@ -33,6 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import pgbot.aqiObj.AqiResult;
 import pgbot.aqiObj.Datum;
 import pgbot.stockObj.*;
+import pgbot.utils.LineNotify;
+import pgbot.utils.PgLog;
 import pgbot.utils.Utils;
 
 import java.lang.reflect.*;
@@ -1012,12 +1017,12 @@ public class PgBotController {
         return strResult;
     }
 
-    public String getUserDisplayPicture(String userid) {
-        String strResult="";
+    public URI getUserDisplayPicture(String userid) {
+        URI strResult=null;
         
         UserProfileResponse userProfileResponse = getUserProfile(userid);
         if (userProfileResponse == null) {
-            return "";
+            return null;
         }
         strResult = userProfileResponse.getPictureUrl();
         
@@ -2088,11 +2093,27 @@ public class PgBotController {
         if (replyToken.isEmpty()) {
             throw new IllegalArgumentException("replyToken must not be empty");
         }
+        try {
+            this.replyImage(replyToken, new URI(original), new URI(preview));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void replyImage(@NonNull String replyToken, @NonNull URI original, @NonNull URI preview) {
+        if (replyToken.isEmpty()) {
+            throw new IllegalArgumentException("replyToken must not be empty");
+        }
         this.reply(replyToken, new ImageMessage(original, preview));
     }
 
-    /*private ImageCarouselColumn getImageCarouselColumn(String imageUrl, String label, String url) {
-        return new ImageCarouselColumn(imageUrl, new URIAction(label, url));
+    private ImageCarouselColumn getImageCarouselColumn(String imageUrl, String label, String url) {
+        try {
+            return new ImageCarouselColumn(new URI(imageUrl), new URIAction(label, new URI(url), new AltUri(new URI(url))));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private void replyImageCarouselTemplate(@NonNull String replyToken, @NonNull List<ImageCarouselColumn> columns) {
@@ -2100,7 +2121,7 @@ public class PgBotController {
             throw new IllegalArgumentException("replyToken must not be empty");
         }
         this.reply(replyToken, new TemplateMessage("PG soooo cute!", new ImageCarouselTemplate(columns)));
-    }*/
+    }
 
     private void replyLocation(@NonNull String replyToken, @NonNull String title, @NonNull String address, double latitude, double longitude) {
         if (replyToken.isEmpty()) {
@@ -3518,14 +3539,14 @@ This code is public domain: you are free to use, link and/or modify it in any wa
             context = EntityUtils.toString(httpEntity, "utf-8");
 
             int maxCount = 0; // Max: 5
-            /*List<ImageCarouselColumn> columnsList = new ArrayList<>();
+            List<ImageCarouselColumn> columnsList = new ArrayList<>();
             while (maxCount<5 && context.indexOf("data-asin=\"")> 0) {
                 context = context.substring(context.indexOf("data-asin=\""), context.length());
                 context = context.substring(context.indexOf("href=\"https:")+6, context.length());
                 String searchResultUrl = context.substring(0, context.indexOf("\"><img"));
                 String imgUrl = context.substring(context.indexOf("<img src=\"")+10, context.indexOf("\" srcset="));
-                Log.info("Piggy Check searchResultUrl: " + searchResultUrl);
-                Log.info("Piggy Check imgUrl: " + imgUrl);
+                PgLog.info("Piggy Check searchResultUrl: " + searchResultUrl);
+                PgLog.info("Piggy Check imgUrl: " + imgUrl);
                 columnsList.add(getImageCarouselColumn(imgUrl, "PG Cute!", searchResultUrl));
             }
             if (maxCount>0) {
@@ -3533,7 +3554,7 @@ This code is public domain: you are free to use, link and/or modify it in any wa
             }
             else {
                 this.replyText(replyToken, "搜索失敗");
-            }*/
+            }
 
         }catch (IOException e2) {
             this.replyText(replyToken, "搜索大失敗");
@@ -4148,12 +4169,6 @@ This code is public domain: you are free to use, link and/or modify it in any wa
             url = url.replace("http", "https");
         }
         this.replyImage(replyToken, url, url);
-        
-    }
-
-    private void pexelFoodCount(String text, String replyToken) throws IOException {
-
-        
         
     }
 
@@ -5379,7 +5394,7 @@ This code is public domain: you are free to use, link and/or modify it in any wa
 
     private void printUserDisplayPicture(String text, String replyToken) {
         text = text.replace("PgCommand使用者顯示圖片:", "");
-        String source = getUserDisplayPicture(text);
+        URI source = getUserDisplayPicture(text);
         this.replyImage(replyToken, source, source);
     }
 
@@ -5981,7 +5996,13 @@ This code is public domain: you are free to use, link and/or modify it in any wa
     }
 
     private void help(String text, String replyToken) throws IOException {
-        String imageUrl = "https://p1.bqimg.com/524586/f7f88ef91547655cs.png";
+        URI imageUrl;
+        try {
+            imageUrl = new URI("https://p1.bqimg.com/524586/f7f88ef91547655cs.png");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return;
+        }
         ButtonsTemplate buttonsTemplate = new ButtonsTemplate(imageUrl,"安安","你好",
                 Arrays.asList(
                         new MessageAction("查個股股價","輸入 @2331? 或 @台積電?"),
@@ -5995,7 +6016,7 @@ This code is public domain: you are free to use, link and/or modify it in any wa
     }
 
     private void help2(String text, String replyToken) throws IOException {
-        String imageUrl = "https://p1.bqimg.com/524586/f7f88ef91547655cs.png";
+        /*String imageUrl = "https://p1.bqimg.com/524586/f7f88ef91547655cs.png";
         CarouselTemplate carouselTemplate = new CarouselTemplate(
                 Arrays.asList(
                         new CarouselColumn(imageUrl, "安安", "你好",
@@ -6022,7 +6043,8 @@ This code is public domain: you are free to use, link and/or modify it in any wa
                 )
         );
         TemplateMessage templateMessage = new TemplateMessage("The function Only on mobile device ! ", carouselTemplate);
-        this.reply(replyToken, templateMessage);
+        this.reply(replyToken, templateMessage);*/
+        return;
     }
 
     private String decodeJandanImageUrl(String input) {

@@ -1,3 +1,7 @@
-    [v0.0.0]
+[v0.0.1]
 
-    (1) Copy from OhBot clone https://github.com/ChonPiggy/OhBot
+(1) Test first time transfer to PgBot from Heroku
+
+(2) Enable AmazonJp
+
+(3) Line API version set to 3.6

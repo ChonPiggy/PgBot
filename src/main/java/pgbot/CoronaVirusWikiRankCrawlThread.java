@@ -1,95 +1,20 @@
 package pgbot;
 
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.linecorp.bot.client.LineMessagingClient;
-import com.linecorp.bot.model.PushMessage;
-import com.linecorp.bot.model.ReplyMessage;
-import com.linecorp.bot.model.action.URIAction;
-import com.linecorp.bot.model.action.MessageAction;
-import com.linecorp.bot.model.action.PostbackAction;
-import com.linecorp.bot.model.event.Event;
-import com.linecorp.bot.model.event.MessageEvent;
-import com.linecorp.bot.model.event.PostbackEvent;
-import com.linecorp.bot.model.event.message.TextMessageContent;
-import com.linecorp.bot.model.message.Message;
-import com.linecorp.bot.model.message.TemplateMessage;
-import com.linecorp.bot.model.message.TextMessage;
-import com.linecorp.bot.model.message.ImageMessage;
-import com.linecorp.bot.model.message.LocationMessage;
-import com.linecorp.bot.model.message.template.ButtonsTemplate;
-import com.linecorp.bot.model.message.template.CarouselColumn;
-import com.linecorp.bot.model.message.template.CarouselTemplate;
 //import com.linecorp.bot.model.message.template.ImageCarouselColumn;
-//import com.linecorp.bot.model.message.template.ImageCarouselTemplate;
-import com.linecorp.bot.model.profile.UserProfileResponse;
-import com.linecorp.bot.model.response.BotApiResponse;
-import com.linecorp.bot.model.event.source.*;
-import com.linecorp.bot.spring.boot.annotation.EventMapping;
-import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 import emoji4j.EmojiUtils;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import pgbot.aqiObj.AqiResult;
-import pgbot.aqiObj.Datum;
-import pgbot.stockObj.*;
-import pgbot.utils.Utils;
 
-import java.lang.reflect.*;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.Iterator;
-import java.lang.reflect.Method;
-
-import org.apache.http.HttpHost;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import retrofit2.Response;
-
-import javax.net.ssl.*;
-import java.io.*;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.text.DecimalFormat;
-import java.time.Instant;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
-import java.util.Date;
-import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
-import java.util.Random;
-
-import java.util.Base64;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.net.*;
 import java.lang.Integer;
 
 public class CoronaVirusWikiRankCrawlThread extends Thread {
@@ -100,7 +25,7 @@ public class CoronaVirusWikiRankCrawlThread extends Thread {
 
     private byte[] lock = new byte[0];
 
-    private String mUpdateTime = "";
+    //private String mUpdateTime = "";
     private int mRank = 0; // rank 0 is world
 
     public void run() {
@@ -128,7 +53,7 @@ public class CoronaVirusWikiRankCrawlThread extends Thread {
 
             // Catch update time
             String temp = strResult.substring(strResult.indexOf("截至"), strResult.length());
-            mUpdateTime = temp.substring(0, temp.indexOf("日")+1);
+            //mUpdateTime = temp.substring(0, temp.indexOf("日")+1);
             // get world wide count
             if (strResult.contains("\" title=\"世界\">")) {
                 strResult = strResult.substring(strResult.indexOf("\" title=\"世界\">")+13, strResult.length());
